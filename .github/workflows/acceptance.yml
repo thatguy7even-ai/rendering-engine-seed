@@ -1,0 +1,43 @@
+# Approved by Dakota Oct 25, 2026 — pushed as the one-Action proof (Gamma DevOps turn + Mother draft)
+# GitHub Actions workflow: run Control's LC-6 acceptance harness
+# on every push and pull request touching the seed toy.
+#
+# Why this shape:
+# - The harness is stdlib-only, so no dependency install step is needed.
+# - Its exit semantics are the gate: exit 0 iff no UNEXPECTED failures.
+#   PASS + EXPECTED_FAIL (3, with named aspect owners) still exits 0,
+#   so CI stays green while the aspect builds work their list —
+#   green here means "no unexpected failures", not "all v0.2 done".
+# - UNMEASURABLE (1, internal rendering) is marked, never faked,
+#   and does not fail the run.
+# - Harness locates twin/ and mother/ builds beside control/, so it
+#   must run from the repo root, which `actions/checkout` provides.
+
+name: acceptance-harness
+
+on:
+  push:
+    paths:
+      - "control/**"
+      - "twin/**"
+      - "mother/**"
+      - ".github/workflows/acceptance.yml"
+  pull_request:
+    paths:
+      - "control/**"
+      - "twin/**"
+      - "mother/**"
+      - ".github/workflows/acceptance.yml"
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out seed toy
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run Control acceptance harness (v0.2 rules)
+        run: python3 control/acceptance_harness.py
