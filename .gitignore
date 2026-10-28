@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+toys/individual/outputs/
+toys/combined/outputs/
+toys/combined/seat-plays/outputs/
