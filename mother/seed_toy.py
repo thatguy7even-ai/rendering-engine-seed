@@ -241,9 +241,11 @@ class Sampler:
         return self.world.mesh.covering_set(x, y)
 
     def glyph_at(self, i, j):
-        """One cell, one glyph: the representative is the node the point
-        lies deepest inside (min distance - bubble_radius), tie -> lowest
-        id. The SET is the semantics; the glyph is presentation only."""
+        """One cell, one glyph: the representative is the covering node
+        minimizing distance / bubble_radius, tie -> lowest id (spec v0.2
+        D1 pinned rule; D1 alignment by Control, Oct 30, 2026 — was min
+        distance - bubble_radius). The SET is the semantics; the glyph
+        is presentation only."""
         x, y = self.point(i, j)
         cover = self.world.mesh.covering_set(x, y)
         if not cover:
@@ -252,7 +254,7 @@ class Sampler:
 
         def key(nid):
             n = self.world.mesh.nodes[nid]
-            return (math.hypot(n.x - x, n.y - y) - n.bubble_radius(tps), nid)
+            return (math.hypot(n.x - x, n.y - y) / n.bubble_radius(tps), nid)
 
         return self.world.mesh.nodes[min(cover, key=key)].glyph(tps)
 
